@@ -34,8 +34,43 @@ def card_ranks(cards):
     return sorted(ranks, reverse=True)
 
 
+# -----------
+# User Instructions
+# 
+# Define two functions, straight(ranks) and flush(hand).
+# Keep in mind that ranks will be ordered from largest
+# to smallest.
+
+def straight(ranks):
+    "Return True if the ordered ranks form a 5-card straight."
+    ranks.sort(reverse=True)
+    for i, r in enumerate(ranks):
+        if i < len(ranks)-1 and r - ranks[i+1] != 1:
+            return False
+    return True
+
+def flush(hand):
+    "Return True if all the cards have the same suit."
+    for i, card in enumerate(hand):
+            if i < len(hand) - 1 and card[1] != hand[i+1][1]:
+                return False
+    return True
+    
+def test():
+    "Test cases for the functions in poker program."
+    sf = "6C 7C 8C 9C TC".split()
+    fk = "9D 9H 9S 9C 7D".split()
+    fh = "TD TC TH 7C 7D".split()
+    assert straight([9, 8, 7, 6, 5]) == True
+    assert straight([9, 8, 8, 6, 5]) == False
+    assert flush(sf) == True
+    assert flush(fk) == False
+    return 'tests pass'
+
+
 def main():
   print(card_ranks(['AC', '3D', '4S', 'KH', 'UH'])) #should output [14, 13, 4, 3]
+  print(test())
 
 
 if __name__ == "__main__":
