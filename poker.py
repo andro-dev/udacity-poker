@@ -12,26 +12,11 @@ import sys
 
 
 def card_ranks(cards):
-    rank_map = {
-        '2': 2, '3': 3, '4': 4, '5': 5,
-        '6': 6, '7': 7, '8': 8, '9': 9,
-        'T': 10, 'J': 11, 'Q': 12,
-        'K': 13, 'A': 14
-    }
-
-    # ranks = [rank_map[card[0]] for card in cards if card[0] in rank_map]
-
-    ranks = []
-    for card in cards:
-        rank = card[0]
-        if rank not in rank_map:
-            # raise ValueError(f"Invalid card rank: {rank!r} in {card!r}")
-            print(f"Warning: invalid card {card!r} ignored.", file=sys.stderr)
-            continue
-
-        ranks.append(rank_map[rank])
-        
-    return sorted(ranks, reverse=True)
+# "Return a list of the ranks, sorted with higher first."
+    ranks = ['--23456789TJQKA'.index(r) for r, s in cards]
+    ranks.sort(reverse = True)
+    # account for straight with high 5 (Ace rank is 1)
+    return [1,2,3,4,5] if ranks == [14,5,4,3,2] else ranks
 
 
 # -----------
@@ -56,6 +41,8 @@ def test():
     sf = "6C 7C 8C 9C TC".split()  # noqa: SIM905
     fk = "9D 9H 9S 9C 7D".split()  # noqa: SIM905
     fh = "TD TC TH 7C 7D".split()  # noqa: F841, SIM905
+    al = "AC 2D 4H 3D 5S".split() # Ace-Low Straight
+    assert straight(card_ranks(al))
     assert straight([9, 8, 7, 6, 5]) == True
     assert straight([9, 8, 8, 6, 5]) == False
     assert flush(sf) == True
@@ -64,7 +51,7 @@ def test():
 
 
 def main():
-  print(card_ranks(['AC', '3D', '4S', 'KH', 'UH'])) #should output [14, 13, 4, 3]
+#   print(card_ranks(['AC', '3D', '4S', 'KH', 'UH'])) #should output [14, 13, 4, 3]
   print(test())
 
 
