@@ -8,7 +8,8 @@
     
 # print(cards)
 
-import sys
+import sys, random
+from pprint import pp
 
 def poker(hands):
     "Return a list of winning hands: poker([hand,...]) => [hand,...]"
@@ -23,49 +24,9 @@ def allmax(iterable, key=None):
     return allmax
 
 
-import random
-from pprint import pp
-
-mydeck = [r+s for r in '23456789TJQKA' for s in 'SHDC'] 
-
-def deal(numhands, n=5, deck=mydeck):
-    """Deals random hands of cards by removing them from a deck.
-
-    This function destructively modifies the passed deck by randomly picking 
-    cards and removing them until all requested hands are filled.
-
-    Args:
-        numhands: The number of hands (players) to deal cards to.
-        n: The number of cards to deal per hand. Defaults to 5.
-        deck: The list of cards to deal from. If None, it defaults to a copy 
-            of the global `mydeck`. Defaults to None.
-
-    Returns:
-        A list of lists, where each sublist represents a hand of `n` cards.
-
-    Raises:
-        ValueError: If `deck` does not contain enough cards to complete 
-            the requested deal.
-    """
-
-    if len(deck) < (numhands * n):
-        err_str = f"""Not enough cards in the deck to complete the deal.         
-                        Cards in the deck:  {len(deck)} 
-                        Cards needed:       {numhands * n}
-                    """
-        raise ValueError(err_str)
-
-    hands = []
-    # repeat numhands times
-    for _ in range(numhands):        
-        hand = []
-        for _ in range(n):
-            card_idx = random.randint(0, len(deck)-1)
-            card = deck[card_idx]
-            hand.append(card)
-            deck.remove(card)
-        hands.append(hand)
-    return hands
+def deal(numhands, n=5, deck=[r+s for r in '23456789TJQKA' for s in 'SHDC'] ):
+    random.shuffle(deck)
+    return [deck[n*i : n*(i+1)] for i in range(numhands)]
 
 def hand_rank(hand):
     "Return a value indicating the ranking of a hand."
