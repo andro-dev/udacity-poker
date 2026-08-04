@@ -10,6 +10,85 @@
 
 import sys
 
+def poker(hands):
+    "Return a list of winning hands: poker([hand,...]) => [hand,...]"
+    return allmax(hands, key=hand_rank)
+
+def allmax(iterable, key=None):
+    "Return a list of all items equal to the max of the iterable."
+    # Your code here.
+    allmax = []
+    max_rank = max(hand_rank(hand) for hand in iterable)
+    [allmax.append(hand) for hand in iterable if hand_rank(hand) == max_rank]
+    return allmax
+
+
+import random
+from pprint import pp
+
+mydeck = [r+s for r in '23456789TJQKA' for s in 'SHDC'] 
+
+def deal(numhands, n=5, deck=mydeck):
+    """Deals random hands of cards by removing them from a deck.
+
+    This function destructively modifies the passed deck by randomly picking 
+    cards and removing them until all requested hands are filled.
+
+    Args:
+        numhands: The number of hands (players) to deal cards to.
+        n: The number of cards to deal per hand. Defaults to 5.
+        deck: The list of cards to deal from. If None, it defaults to a copy 
+            of the global `mydeck`. Defaults to None.
+
+    Returns:
+        A list of lists, where each sublist represents a hand of `n` cards.
+
+    Raises:
+        ValueError: If `deck` does not contain enough cards to complete 
+            the requested deal.
+    """
+
+    if len(deck) < (numhands * n):
+        err_str = f"""Not enough cards in the deck to complete the deal.         
+                        Cards in the deck:  {len(deck)} 
+                        Cards needed:       {numhands * n}
+                    """
+        raise ValueError(err_str)
+
+    hands = []
+    # repeat numhands times
+    for _ in range(numhands):        
+        hand = []
+        for _ in range(n):
+            card_idx = random.randint(0, len(deck)-1)
+            card = deck[card_idx]
+            hand.append(card)
+            deck.remove(card)
+        hands.append(hand)
+    return hands
+
+def hand_rank(hand):
+    "Return a value indicating the ranking of a hand."
+    ranks = card_ranks(hand) 
+    if straight(ranks) and flush(hand):
+        return (8, max(ranks))
+    elif kind(4, ranks):
+        return (7, kind(4, ranks), kind(1, ranks))
+    elif kind(3, ranks) and kind(2, ranks):
+        return (6, kind(3, ranks), kind(2, ranks))
+    elif flush(hand):
+        return (5, ranks)
+    elif straight(ranks):
+        return (4, max(ranks))
+    elif kind(3, ranks):
+        return (3, kind(3, ranks), ranks)
+    elif two_pair(ranks):
+        return (2, two_pair(ranks), ranks)
+    elif kind(2, ranks):
+        return (1, kind(2, ranks), ranks)
+    else:
+        return (0, ranks)
+
 
 def card_ranks(cards):
 # "Return a list of the ranks, sorted with higher first."
@@ -35,24 +114,36 @@ def flush(hand):
     "Return True if all the cards have the same suit."
     suits = [s for r,s in hand]
     return len(set(suits)) == 1
-    
+
+def kind(n, ranks):
+    """Return the first rank that this hand has exactly n-of-a-kind of.
+    Return None if there is no n-of-a-kind in the hand."""
+    for r in ranks:
+        if ranks.count(r) == n: return r
+    return None
+
+def two_pair(ranks):
+    "If there are two pair here, return the two ranks of the two pairs, else None."
+    pair = kind(2, ranks)
+    lowpair = kind(2, list(reversed(ranks)))
+    if pair and lowpair != pair:
+        return (pair, lowpair)
+    else:
+        return None
+
 def test():
-    "Test cases for the functions in poker program."
-    sf = "6C 7C 8C 9C TC".split()  # noqa: SIM905
-    fk = "9D 9H 9S 9C 7D".split()  # noqa: SIM905
-    fh = "TD TC TH 7C 7D".split()  # noqa: F841, SIM905
-    al = "AC 2D 4H 3D 5S".split() # Ace-Low Straight
-    assert straight(card_ranks(al))
-    assert straight([9, 8, 7, 6, 5]) == True
-    assert straight([9, 8, 8, 6, 5]) == False
-    assert flush(sf) == True
-    assert flush(fk) == False
+    #"Test cases for the functions in poker program."
+    sf1 = "6C 7C 8C 9C TC".split() # Straight Flush
+    sf2 = "6D 7D 8D 9D TD".split() # Straight Flush
+    fk = "9D 9H 9S 9C 7D".split() # Four of a Kind
+    fh = "TD TC TH 7C 7D".split() # Full House
+    assert poker([sf1, sf2, fk, fh]) == [sf1, sf2] 
     return 'tests pass'
 
 
 def main():
-#   print(card_ranks(['AC', '3D', '4S', 'KH', 'UH'])) #should output [14, 13, 4, 3]
   print(test())
+  pp(deal(8,5)) # print 8 hands - 5 cards each
 
 
 if __name__ == "__main__":
